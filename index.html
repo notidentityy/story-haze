@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story Haze</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI';
+  background:#f6f3ff;
+}
+
+header{
+  background:#a78bfa;
+  color:white;
+  padding:20px;
+  text-align:center;
+  font-size:24px;
+}
+
+.container{
+  max-width:800px;
+  margin:auto;
+  padding:20px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  margin-top:15px;
+  border-radius:10px;
+}
+
+input, textarea{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+button{
+  margin-top:10px;
+  padding:10px;
+  background:#a78bfa;
+  color:white;
+  border:none;
+  border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>Story Haze 💜</header>
+
+<div class="container">
+
+<h3>Tulis Cerita</h3>
+
+<input id="judul" placeholder="Judul cerita...">
+<textarea id="isi" placeholder="Tulis ceritamu..."></textarea>
+
+<button onclick="tambah()">Publish</button>
+
+<div id="posts"></div>
+
+</div>
+
+<script>
+
+let posts = JSON.parse(localStorage.getItem('storyhaze') || "[]");
+
+function tambah(){
+  let j = judul.value;
+  let i = isi.value;
+
+  if(!j || !i){
+    alert("Isi dulu ya 😆");
+    return;
+  }
+
+  posts.push({j,i});
+  localStorage.setItem('storyhaze', JSON.stringify(posts));
+
+  tampil();
+}
+
+function tampil(){
+  let el = document.getElementById("posts");
+  el.innerHTML = "";
+
+  posts.slice().reverse().forEach(p=>{
+    el.innerHTML += `
+      <div class="card">
+        <h3>${p.j}</h3>
+        <p>${p.i}</p>
+      </div>
+    `;
+  });
+}
+
+tampil();
+
+</script>
+
+</body>
+</html>
