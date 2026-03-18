@@ -30,7 +30,7 @@ header{
   background:white;
   padding:15px;
   margin-top:15px;
-  border-radius:10px;
+  border-radius:12px;
 }
 
 input, textarea{
@@ -51,6 +51,12 @@ button{
   cursor:pointer;
 }
 
+img{
+  width:100%;
+  margin-top:10px;
+  border-radius:10px;
+}
+
 .like{
   margin-top:10px;
   font-size:14px;
@@ -69,6 +75,8 @@ button{
 <input id="judul" placeholder="Judul cerita...">
 <textarea id="isi" placeholder="Tulis ceritamu..."></textarea>
 
+<input type="file" id="gambar">
+
 <button onclick="tambah()">Publish</button>
 
 <input id="search" placeholder="Cari cerita..." oninput="tampil()">
@@ -84,15 +92,27 @@ let posts = JSON.parse(localStorage.getItem('storyhaze') || "[]");
 function tambah(){
   let j = judul.value;
   let i = isi.value;
+  let file = document.getElementById("gambar").files[0];
 
   if(!j || !i){
     alert("Isi dulu ya 😆");
     return;
   }
 
-  posts.push({j,i,like:0});
-  localStorage.setItem('storyhaze', JSON.stringify(posts));
+  if(file){
+    let reader = new FileReader();
+    reader.onload = function(e){
+      simpan(j,i,e.target.result);
+    }
+    reader.readAsDataURL(file);
+  }else{
+    simpan(j,i,null);
+  }
+}
 
+function simpan(j,i,img){
+  posts.push({j,i,img,like:0});
+  localStorage.setItem('storyhaze', JSON.stringify(posts));
   tampil();
 }
 
@@ -121,9 +141,9 @@ function tampil(){
         <h3>${p.j}</h3>
         <p>${p.i}</p>
 
-        <div class="like">
-          ❤️ ${p.like}
-        </div>
+        ${p.img ? `<img src="${p.img}">` : ""}
+
+        <div class="like">❤️ ${p.like}</div>
 
         <button onclick="likePost(${posts.length-1-i})">Like</button>
         <button onclick="hapus(${posts.length-1-i})">Hapus</button>
