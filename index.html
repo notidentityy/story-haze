@@ -1,162 +1,124 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Story Haze</title>
-
-<style>
-body{
-  margin:0;
-  font-family:'Segoe UI';
-  background:#f6f3ff;
-}
-
-header{
-  background:#a78bfa;
-  color:white;
-  padding:20px;
-  text-align:center;
-  font-size:26px;
-}
-
-.container{
-  max-width:800px;
-  margin:auto;
-  padding:20px;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  margin-top:15px;
-  border-radius:12px;
-}
-
-input, textarea{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border-radius:8px;
-  border:1px solid #ddd;
-}
-
-button{
-  margin-top:10px;
-  padding:10px;
-  background:#a78bfa;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-img{
-  width:100%;
-  margin-top:10px;
-  border-radius:10px;
-}
-
-.like{
-  margin-top:10px;
-  font-size:14px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Haze</title>
+  <style>
+    body{margin:0;font-family:'Segoe UI',sans-serif;background:#f6f3ff;color:#333}
+    header{background:#a78bfa;color:#fff;padding:18px;text-align:center;font-size:24px;font-weight:600}
+    nav{display:flex;justify-content:center;gap:20px;background:#fff;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    nav a{cursor:pointer;color:#555;text-decoration:none}
+    nav a:hover{color:#000}
+    .container{max-width:900px;margin:20px auto;padding:0 15px}
+    .card{background:#fff;padding:18px;margin-bottom:20px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.05)}
+    input,textarea{width:100%;margin-top:10px;padding:10px;border-radius:8px;border:1px solid #ddd}
+    button{background:#a78bfa;color:#fff;border:none;padding:8px 14px;border-radius:8px;margin-top:8px;cursor:pointer}
+    img{max-width:100%;border-radius:10px;margin-top:10px}
+    .hidden{display:none}
+    .actions{display:flex;gap:10px;margin-top:10px;font-size:14px}
+    .search{margin-bottom:15px}
+  </style>
 </head>
-
 <body>
-
-<header>Story Haze 💜</header>
-
+<header>Story Haze ✨</header>
+<nav>
+  <a onclick="showPage('home')">Home</a>
+  <a onclick="showPage('tulis')">Write</a>
+  <a onclick="showPage('tentang')">About</a>
+  <a onclick="showPage('login')">Login</a>
+</nav>
 <div class="container">
 
-<h3>Tulis Cerita</h3>
+<div id="home">
+  <input class="search" placeholder="Cari cerita..." oninput="cari(this.value)">
+  <div id="posts"></div>
+</div>
 
-<input id="judul" placeholder="Judul cerita...">
-<textarea id="isi" placeholder="Tulis ceritamu..."></textarea>
+<div id="tulis" class="hidden">
+  <div class="card">
+    <h2>Tulis Cerita</h2>
+    <input id="judul" placeholder="Judul">
+    <textarea id="isi" rows="5" placeholder="Isi cerita..."></textarea>
+    <input type="file" id="gambar">
+    <button onclick="tambah()">Publish</button>
+  </div>
+</div>
 
-<input type="file" id="gambar">
+<div id="tentang" class="hidden">
+  <div class="card">
+    <h2>Tentang Penulis 💜</h2>
+    <p>Halo! Ini adalah Story Haze, tempat berbagi cerita, imajinasi, dan kreativitas ✨</p>
+  </div>
+</div>
 
-<button onclick="tambah()">Publish</button>
-
-<input id="search" placeholder="Cari cerita..." oninput="tampil()">
-
-<div id="posts"></div>
+<div id="login" class="hidden">
+  <div class="card">
+    <h2>Login</h2>
+    <input id="user" placeholder="Username">
+    <button onclick="login()">Masuk</button>
+  </div>
+</div>
 
 </div>
 
 <script>
+let posts = JSON.parse(localStorage.getItem('posts'))||[];
+let user = localStorage.getItem('user');
 
-let posts = JSON.parse(localStorage.getItem('storyhaze') || "[]");
+function login(){
+  user=document.getElementById('user').value;
+  localStorage.setItem('user',user);
+  alert('Login berhasil!');
+}
 
 function tambah(){
-  let j = judul.value;
-  let i = isi.value;
-  let file = document.getElementById("gambar").files[0];
-
-  if(!j || !i){
-    alert("Isi dulu ya 😆");
-    return;
-  }
-
-  if(file){
-    let reader = new FileReader();
-    reader.onload = function(e){
-      simpan(j,i,e.target.result);
-    }
-    reader.readAsDataURL(file);
-  }else{
-    simpan(j,i,null);
-  }
+  if(!user){alert('Login dulu ya!');return}
+  let j=judul.value,i=isi.value,f=gambar.files[0];
+  if(!j||!i){alert('Isi dulu!');return}
+  if(f){let r=new FileReader();r.onload=e=>save(j,i,e.target.result);r.readAsDataURL(f)}
+  else save(j,i,null);
 }
 
-function simpan(j,i,img){
-  posts.push({j,i,img,like:0});
-  localStorage.setItem('storyhaze', JSON.stringify(posts));
-  tampil();
+function save(j,i,img){
+  posts.push({j,i,img,like:0,kom:[]});
+  localStorage.setItem('posts',JSON.stringify(posts));
+  judul.value='';isi.value='';gambar.value='';
+  tampil();showPage('home');
 }
 
-function likePost(index){
-  posts[index].like++;
-  localStorage.setItem('storyhaze', JSON.stringify(posts));
-  tampil();
-}
-
-function hapus(index){
-  posts.splice(index,1);
-  localStorage.setItem('storyhaze', JSON.stringify(posts));
-  tampil();
-}
-
-function tampil(){
-  let el = document.getElementById("posts");
-  let keyword = document.getElementById("search").value.toLowerCase();
-
-  el.innerHTML = "";
-
-  posts.slice().reverse().forEach((p,i)=>{
-    if(p.j.toLowerCase().includes(keyword) || p.i.toLowerCase().includes(keyword)){
-      el.innerHTML += `
-      <div class="card">
-        <h3>${p.j}</h3>
-        <p>${p.i}</p>
-
-        ${p.img ? `<img src="${p.img}">` : ""}
-
-        <div class="like">❤️ ${p.like}</div>
-
-        <button onclick="likePost(${posts.length-1-i})">Like</button>
-        <button onclick="hapus(${posts.length-1-i})">Hapus</button>
+function tampil(list=posts){
+  let el=document.getElementById('posts');el.innerHTML='';
+  list.slice().reverse().forEach((p,idx)=>{
+    el.innerHTML+=`<div class=card>
+      <h3>${p.j}</h3>
+      <p>${p.i}</p>
+      ${p.img?`<img src="${p.img}">`:''}
+      <div class=actions>
+        ❤️ ${p.like}
+        <button onclick="like(${idx})">Like</button>
       </div>
-      `;
-    }
+      <input placeholder="Komentar..." onkeydown="if(event.key==='Enter')komen(${idx},this.value)">
+      <div>${p.kom.map(k=>'<p>💬 '+k+'</p>').join('')}</div>
+    </div>`;
   });
 }
 
+function like(i){posts[i].like++;update()}
+function komen(i,t){if(t){posts[i].kom.push(t);update()}}
+function update(){localStorage.setItem('posts',JSON.stringify(posts));tampil()}
+
+function cari(q){
+  let hasil=posts.filter(p=>p.j.toLowerCase().includes(q.toLowerCase()));
+  tampil(hasil);
+}
+
+function showPage(p){
+  ['home','tulis','tentang','login'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById(p).classList.remove('hidden');
+}
+
 tampil();
-
 </script>
-
 </body>
 </html>
-
